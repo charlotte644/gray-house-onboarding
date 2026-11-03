@@ -50,11 +50,12 @@ function setUpAndTest() {
   const c = cal_();
   Logger.log('Calendar: ' + c.getName());
   Logger.log('Free days found: ' + Object.keys(getSlots()).length);
-  MailApp.sendEmail({ to: CONFIG.MICHELLE_EMAIL, subject: 'The Gray House onboarding: set-up test', htmlBody: email_('Set-up test', '<p>The onboarding service can send email and read the calendar. You can delete this email.</p>'), name: CONFIG.FROM_NAME });
-  Logger.log('Test email sent to ' + CONFIG.MICHELLE_EMAIL + '. Remaining email quota today: ' + MailApp.getRemainingDailyQuota());
+  MailApp.sendEmail({ to: michelle_(), subject: 'The Gray House onboarding: set-up test', htmlBody: email_('Set-up test', '<p>The onboarding service can send email and read the calendar. You can delete this email.</p>'), name: CONFIG.FROM_NAME });
+  Logger.log('Test email sent to ' + michelle_() + '. Remaining email quota today: ' + MailApp.getRemainingDailyQuota());
 }
 
 /* ---------- helpers ---------- */
+function michelle_() { return CONFIG.MICHELLE_EMAIL || Session.getEffectiveUser().getEmail(); }
 function secret_() {
   const p = PropertiesService.getScriptProperties();
   let s = p.getProperty('SECRET');
@@ -97,7 +98,7 @@ function throttle_(key, max) {
   c.put(k, String(n + 1), 3600);
 }
 function send_(o) {
-  MailApp.sendEmail(Object.assign({ name: CONFIG.FROM_NAME, replyTo: CONFIG.MICHELLE_EMAIL }, o));
+  MailApp.sendEmail(Object.assign({ name: CONFIG.FROM_NAME, replyTo: michelle_() }, o));
 }
 function email_(title, body, button) {
   return '<div style="background:#f5f3f0;padding:24px 12px;font-family:Arial,Helvetica,sans-serif;color:#2e2f36">' +
@@ -142,7 +143,7 @@ function submitPack(p) {
   try { terms = UrlFetchApp.fetch(CONFIG.TERMS_URL).getBlob().setName('The Gray House - Terms of Business v9.0 (Wales).pdf'); } catch (e) { console.error('Terms PDF not attached: ' + e); }
   const list = arr => arr && arr.length ? '<ul style="margin:6px 0 0 18px;padding:0">' + arr.map(x => '<li>' + esc_(x) + '</li>').join('') + '</ul>' : '';
   send_({
-    to: CONFIG.MICHELLE_EMAIL, replyTo: email,
+    to: michelle_(), replyTo: email,
     subject: 'Onboarding complete: ' + name + ', ' + (w.addr1 || addr),
     htmlBody: email_('New landlord onboarding', '<p>' + esc_(name) + (p.name2 ? ' and ' + esc_(p.name2) : '') + ' signed the Terms of Business, onboarding checklist and property questionnaire.</p>' +
       rows_([['Landlord', esc_(name) + (p.name2 ? ' and ' + esc_(p.name2) : '')], ['Email', esc_(email)], ['Phone', esc_(w.phone)], ['Property', esc_(addr)], ['Service', esc_(p.tier)], ['Reference', esc_(ref)], ['Signed', esc_(fmt_(new Date(p.signedAt || Date.now()), 'd MMMM yyyy, HH:mm'))]]) +
@@ -198,7 +199,7 @@ function book(p) {
     Object.keys(v).forEach(k => setTag_(ev, k, clean_(v[k], 400)));
     const when = when_(ev), link = CONFIG.SITE_URL + '?r=' + token_('r', ev.getId());
     send_({
-      to: CONFIG.MICHELLE_EMAIL, replyTo: email,
+      to: michelle_(), replyTo: email,
       subject: 'New booking: valuation visit, ' + fmt_(start, 'EEE d MMM, HH:mm'),
       htmlBody: email_('New valuation visit', rows_([['When', esc_(when) + ' (' + CONFIG.VISIT_MINUTES + ' mins)'], ['Where', esc_(addr)], ['Landlord', esc_(name) + ' · ' + esc_(w.phone) + ' · ' + esc_(email)], ['Service', esc_(p.tierName)], ['Note', esc_(p.note)]]) +
         '<p>It is in your calendar. After the visit, use the button below to enter the agreed rent. The Rental Value Confirmation is then created with your signature and sent to ' + esc_(w.first || name) + ' to sign.</p>', { url: link, label: 'Enter the agreed rent' })
@@ -236,7 +237,7 @@ function issueLetter(t, L) {
     htmlBody: email_('Your Rental Value Confirmation', '<p>Dear ' + esc_(v.first) + ',</p><p>Thank you for meeting ' + esc_(CONFIG.MICHELLE_NAME) + ' at ' + esc_(v.addr1) + '. Your Rental Value Confirmation, at <strong>£' + esc_(rent) + ' per month</strong>, is ready to read and sign. It is supplementary to your Terms of Business.</p>', { url: link, label: 'Read and sign' })
   });
   send_({
-    to: CONFIG.MICHELLE_EMAIL,
+    to: michelle_(),
     subject: 'Sent to sign: Rental Value Confirmation, ' + v.addr1,
     htmlBody: email_('Sent to ' + v.first + ' to sign', '<p>The Rental Value Confirmation for ' + esc_(v.addr1) + ' at <strong>£' + esc_(rent) + ' pcm</strong> has been emailed to ' + esc_(v.first + ' ' + v.last) + '. You\'ll both receive the signed PDF when they sign.</p>')
   });
@@ -260,7 +261,7 @@ function signLetter(t, sig, html) {
     attachments: [pdf]
   });
   send_({
-    to: CONFIG.MICHELLE_EMAIL, replyTo: v.email,
+    to: michelle_(), replyTo: v.email,
     subject: 'Signed: Rental Value Confirmation, ' + v.addr1 + ' (£' + v.rent + ' pcm)',
     htmlBody: email_('Rental value agreed', '<p>' + esc_(v.first + ' ' + v.last) + ' has signed the Rental Value Confirmation for <strong>' + esc_(v.addr1) + '</strong> at <strong>£' + esc_(v.rent) + ' pcm</strong>. The signed PDF is attached, and the same copy has gone to ' + esc_(v.email) + '.</p>'),
     attachments: [pdf.copyBlob()]
