@@ -16,8 +16,8 @@ const CONFIG = {
   MICHELLE_EMAIL: 'charlotte@hammer-and-pen.com',   // where onboarding packs, bookings and signed letters go. Change to Michelle's on go-live.
   MICHELLE_NAME: 'Michelle Barber',
   CALENDAR_ID: 'primary',                           // 'primary' = this Google account's own calendar, or Michelle's calendar address once shared
-  SITE_URL: 'https://charlotte644.github.io/gray-house-onboarding/', // the landlord page
-  TERMS_PDF: 'terms-of-business-v9.pdf',             // the full Terms of Business, next to the page; attached to the landlord's copy
+  SITE_URL: 'https://sub.hammer-and-pen.com/gray-house', // the landlord page (go-live: onboarding.thegrayhouse.co.uk)
+  TERMS_URL: 'https://charlotte644.github.io/gray-house-onboarding/terms-of-business-v9.pdf', // the full Terms of Business, attached to the landlord's copy
   FROM_NAME: 'The Gray House',
   OFFICE_PHONE: '02920 692222',
   SLOT_TIMES: ['09:30', '11:00', '13:30', '15:00', '16:30'],
@@ -139,7 +139,7 @@ function submitPack(p) {
   const uploads = files.map(f => { const b = Utilities.newBlob(Utilities.base64Decode(f.data), f.type || 'application/octet-stream', safeName_(f.name || 'upload')); total += b.getBytes().length; return b; });
   if (total > 20 * 1024 * 1024) throw new Error('The uploads are too large to email. Please send smaller copies.');
   let terms = null;
-  try { terms = UrlFetchApp.fetch(CONFIG.SITE_URL + CONFIG.TERMS_PDF).getBlob().setName('The Gray House - Terms of Business v9.0 (Wales).pdf'); } catch (e) { console.error('Terms PDF not attached: ' + e); }
+  try { terms = UrlFetchApp.fetch(CONFIG.TERMS_URL).getBlob().setName('The Gray House - Terms of Business v9.0 (Wales).pdf'); } catch (e) { console.error('Terms PDF not attached: ' + e); }
   const list = arr => arr && arr.length ? '<ul style="margin:6px 0 0 18px;padding:0">' + arr.map(x => '<li>' + esc_(x) + '</li>').join('') + '</ul>' : '';
   send_({
     to: CONFIG.MICHELLE_EMAIL, replyTo: email,

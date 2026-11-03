@@ -618,7 +618,7 @@ label.att{cursor:pointer;border-style:dashed}
 <section class="hero"><div class="wrap">
   <div>
     <p class="eyebrow">Welcome to The Gray House</p>
-    <h1 id="hello">we're delighted to be looking after your property, <span id="hello-name">Sarah</span>.</h1>
+    <h1 id="hello">we're delighted to be looking after your property<span id="hello-name">, Sarah</span>.</h1>
     <p class="lead">Everything we need to get started is on this one page: your service, our Terms of Business, your compliance checklist and the property questionnaire. Your answers save as you go, so you can stop and pick up again whenever suits you.</p>
     <div class="hero-facts"><span>About 25 minutes in total</span><span>Answers carry across, so nothing is asked twice</span><span>Sign on screen, no printing</span></div>
   </div>
@@ -1828,7 +1828,7 @@ function go(i){S.step=Math.max(0,Math.min(STEPS.length-1,i));save();render()}
 function signNow(){S.signed=true;S.signedAt=new Date().toISOString();S.step=5}
 function renderOnboarding(){
   if(!stepOpen(S.step))S.step=S.signed?5:4;
-  $("#hello-name").textContent=S.who.first||"there";
+  $("#hello-name").textContent=S.who.first?", "+S.who.first:"";
   $("#panel").innerHTML=VIEWS[S.step]();
   renderRail();drawParquet();
 }
@@ -2023,7 +2023,7 @@ document.addEventListener("keydown",e=>{
 });
 document.addEventListener("input",e=>{
   const t=e.target,d=t.dataset;
-  if(d.who){S.who[d.who]=t.value;if(d.who==="first")$("#hello-name").textContent=t.value||"there";save();refreshSoft();return}
+  if(d.who){S.who[d.who]=t.value;if(d.who==="first")$("#hello-name").textContent=t.value?", "+t.value:"";save();refreshSoft();return}
   if(d.input){S.inputs[d.input]=t.value;save();return}
   if(d.qt){S.piq[d.qt]=t.value;save();refreshSoft();return}
   if(t.hasAttribute("data-bnote")){S.bnote=t.value;save();return}
@@ -3064,7 +3064,7 @@ render=function(keep){
   const pv=document.getElementById("portal-view");pv.hidden=false;pv.innerHTML=`<div class="stack" style="gap:18px;max-width:820px;margin:0 auto;padding:28px 0 64px">${refFix(tokenPage())}</div>`;
   $("#lh-meta").innerHTML=LV.mode==="r"?`<strong>Rental value</strong>For The Gray House`:`<strong>Rental Value Confirmation</strong>Secure signing`;
 };
-(function(){const q=new URLSearchParams(location.search);const r=q.get("r"),s=q.get("s");if(!r&&!s)return;
+(function(){const q=new URLSearchParams(location.search||(function(){try{return parent.location.search}catch(e){return ""}})());const r=q.get("r"),s=q.get("s");if(!r&&!s)return;
   LV.mode=r?"r":"s";LV.token=r||s;save=function(){};
   api("getVisit",[LV.token]).then(v=>{LV.visit=v;useVisit(v);if(LV.mode==="r"&&!S.draft.rent){S.draft.rent="";S.draft.from=""}render(true)}).catch(e=>{LV.err=e.message;render(true)});
 })();
@@ -3093,7 +3093,7 @@ window.addEventListener("click",e=>{
 },true);
 /* ---- step 2: the full legal wording is one click away ---- */
 const _lvTerms=VIEWS[1];
-VIEWS[1]=function(){return _lvTerms().replace('<div class="callout"><span>Section T',`<div class="callout"><span>Want the full legal wording now? <a href="terms-of-business-v9.pdf" target="_blank" rel="noopener">Open our Terms of Business (PDF)</a>. A copy is also emailed to you when you sign.</span></div><div class="callout"><span>Section T`)};
+VIEWS[1]=function(){return _lvTerms().replace('<div class="callout"><span>Section T',`<div class="callout"><span>Want the full legal wording now? <a href="https://charlotte644.github.io/gray-house-onboarding/terms-of-business-v9.pdf" target="_blank" rel="noopener">Open our Terms of Business (PDF)</a>. A copy is also emailed to you when you sign.</span></div><div class="callout"><span>Section T`)};
 render(true);
 })();
 </script>
